@@ -144,6 +144,8 @@ export const state = () => ({
   StopWatchArry:{},  
   // StopWatchArry:{LN034:'00:00:00',MC009:'00:00:00',MC010:'00:00:00',MC024:'00:00:00',MC026:'00:00:00',MC027:'00:00:00',MC028:'00:00:00',MC031:'00:00:00',GT999:'00:00:00'},  
   StopWatchArrySinceStart:{},  
+
+
   // StopWatchArry:{LN034:'00:00:00',MC009:'00:00:00',MC010:'00:00:00',MC024:'00:00:00',MC026:'00:00:00',MC027:'00:00:00',MC028:'00:00:00',MC031:'00:00:00',GT999:'00:00:00'},  
 
   //machineごとの最終センシングからの経過時間数値秒
@@ -256,26 +258,30 @@ export const actions = {
 import Vue from 'vue';
 
 export const mutations = {
-  GuntArryWaitPush(state,{GuntStart,GuntHorizon,y,machine}){
-    let GS = Math.round(GuntStart * 100 / 3600);
-    let GH = Math.round(GuntHorizon * 100 / 3600);
+  GuntArryPush(state,{GuntStart,GuntHorizon,y,NowState,machine}){
+    let GS = Math.round(GuntStart * 230 / 3600 * 10 /10)+50;
+    let GH = Math.round(GuntHorizon * 230 / 3600 * 10 /10);
     let Gattai = "M"+GS+","+y+" h"+GH;
         // state.GuntArryWait.push(Gattai);
-        state.GuntArryWait[machine].push(Gattai);
-  },
-  GuntArryRUNPush(state,{GuntStart,GuntHorizon,y,machine}){
-    let GS = Math.round(GuntStart * 100 / 3600);
-    let GH = Math.round(GuntHorizon * 100 / 3600);
-    let Gattai = "M"+GS+","+y+" h"+GH;
-        // state.GuntArryWait.push(Gattai);
-        state.GuntArryRUN[machine].push(Gattai);
-  },
-  GuntArryDDRPush(state,{GuntStart,GuntHorizon,y,machine}){
-    let GS = Math.round(GuntStart * 100 / 3600);
-    let GH = Math.round(GuntHorizon * 100 / 3600);
-    let Gattai = "M"+GS+","+y+" h"+GH;
-        // state.GuntArryWait.push(Gattai);
-        state.GuntArryDDR[machine].push(Gattai);
+        switch(NowState){
+          case 0:
+                state.GuntArryRUN[machine].push(Gattai);
+                break;
+          case 1:
+                state.GuntArryDDR[machine].push(Gattai);
+                break;
+          case 2:
+                state.GuntArryERR[machine].push(Gattai);
+                break;
+          case 3:
+                state.GuntArryKKT[machine].push(Gattai);
+                break;
+          case 4:
+                state.GuntArryWait[machine].push(Gattai);
+                break;
+          default:
+        };
+    
   },
   CycleTimeByouArrySet(state,{TgtMachine,CycleTimeByou}){
     Vue.set(state.CycleTimeByouArry,TgtMachine,CycleTimeByou)
@@ -311,14 +317,26 @@ export const mutations = {
 
   },
   StopWatchArryUD(state,{machineCode,StopWatchTime,StopWatchSecondsTime,StopWatchSecondsTimeStart}){
-    Vue.set(state.StopWatchArry,machineCode,StopWatchTime)
+    Vue.set(state.StopWatchArry,machineCode,StopWatchTime);
     // console.log(state.StopWatchArrySinceStart);
-    // console.log(machineCode + "入れっるのはこれよ。"+StopWatchSecondsTimeStart);
-    Vue.set(state.StopWatchSecondsArry,machineCode,StopWatchSecondsTime)
-    // Vue.set(state.StopWatchArrySinceStart[1],machineCode,StopWatchSecondsTimeStart)
+    console.log(machineCode + "入れっるのはこれよ。"+StopWatchSecondsTimeStart);
+    Vue.set(state.StopWatchSecondsArry,machineCode,StopWatchSecondsTime);
+
+    try {
+      
+      // Vue.set(state.StopWatchArrySinceStart,machineCode,StopWatchSecondsTimeStart) 
+      //上記は、センシング時の登録されたスタート時間なので主旨がことなる
+      
+    } catch (error) {
+      console.log(error);
+    }
 
   },
+  StopWatchArryCycleTimeUD(state,{machineCode,CycleTimeStart}){
+    //センシング時に開始時間がセットされる
+    Vue.set(state.machineHourCutArry,machineCode,machineHour)
   //センサー反応時間からの時間経過をリセットする
+  },
   getStopWatchArrayRst(state,machineCode){
     Vue.set(state.StopWatchArry,machineCode,"00:00:00")
   },
@@ -327,7 +345,7 @@ export const mutations = {
   //   Vue.set(state.sensingTimeArry,machineCode,sensingTime)
   // },
   //機会ごとの最終の、スタート時間と、エンド時間
-  sensingTimeArryUD(state,{machineCode,sensingStartTime,sensingEndTime}){
+  sensingTimeArryUD(state,{machineCode,sensingStartTime,sensingEndTime,JustSensingTime}){
     // Vue.set(state.sensingTimeArry,machineCode,[sensingStartTime,sensingEndTime])
     // Vue.set(state.sensingTimeArry[machineCode][0],sensingStartTime)
     // console.log([machineCode]+"●❏●❏●❏●❏●"+state.sensingTimeArry[machineCode]);
@@ -335,6 +353,7 @@ export const mutations = {
     // console.log([machineCode]+"❏●❏●❏●❏●❏"+state.sensingTimeArry[machineCode]);
     
     state.sensingTimeArry[machineCode][1]=sensingEndTime;
+    state.sensingTimeArry[machineCode][2]=JustSensingTime;
     
     // console.log([machineCode]+"●●●❏❏❏●●●❏❏❏"+state.sensingTimeArry[machineCode]);
     // console.log([machineCode]+"%%%%%%%%%%%%"+state.sensingTimeArry[machineCode]);
@@ -574,10 +593,12 @@ cycleTimeArrayMaijiRst(state,machine){
       //残っていた変数初期化セットをここで便乗させてもらった！
       //20121/5/17
       Vue.set(state.StopWatchArry,machine,'00:00:00');
-      Vue.set(state.StopWatchArrySinceStart,machine,['00:00:00',0]);
-      Vue.set(state.sensingTimeArry,machine,[0,0]);
+      Vue.set(state.StopWatchArrySinceStart,machine,'00:00:00');
+      // Vue.set(state.StopWatchArrySinceStart,machine,['00:00:00',0]);
+
+      Vue.set(state.sensingTimeArry,machine,[0,0,0]);
       // console.log(machine+"$$$$$$$$"+state.sensingTimeArry[machine])
-      Vue.set(state.sensingTimeStArry,machine,'00:00:00');
+      Vue.set(state.sensingTimeStArry,machine,['00:00:00',0]);
       Vue.set(state.StopWatchSecondsArry,machine,0);
       Vue.set(state.cycleCounterDDR,machine,0);
       Vue.set(state.cycleCounterErr,machine,0);
@@ -691,8 +712,26 @@ export const getters = {
     return state.machineHourArry[tgtMachine][0]
   },
 
-  gtNowMachineHour:(state)=>(tgtMachine)=>{
-    return state.machineHourArry[(tgtMachine)][0];
+  getNowMachineHour:(state)=>(tgtMachine)=>{
+    try {
+      return state.machineHourArry[(tgtMachine)][0];
+    } catch (e) {
+      console.log(e)
+    }
+  },
+  getNowDacchaku:(state)=>(tgtMachine)=>{
+    try {
+      return state.machineHourArry[(tgtMachine)][1];
+    } catch (e) {
+      console.log(e)
+    }
+  },
+  getNowDandori:(state)=>(tgtMachine)=>{
+    try {
+      return state.machineHourArry[(tgtMachine)][2];
+    } catch (e) {
+      console.log(e)
+    }
   },
 
   getmachineHourCutArry:(state)=>(tgtMachine)=>{
@@ -712,7 +751,11 @@ export const getters = {
   },
 
   getStopWatchArraySinceStart:(state)=>(tgtMachine)=>{
-    return state.StopWatchArrySinceStart[(tgtMachine)][0]
+    try {
+      return state.StopWatchArrySinceStart[(tgtMachine)]
+    } catch (error) {
+      console.log(error)
+    }
   },
   
   getStopWatchArray:(state)=>(tgtMachine)=>{
@@ -735,6 +778,10 @@ export const getters = {
   getSensingTimeStart:(state)=>(tgtMachine)=>{
     // console.log("@@@@@@@@"+state.sensingTimeArry[tgtMachine]);
     return state.sensingTimeArry[tgtMachine][0];
+  },
+  getJustSensingTime:(state)=>(tgtMachine)=>{
+    // console.log("@@@@@@@@"+state.sensingTimeArry[tgtMachine]);
+    return state.sensingTimeArry[tgtMachine][2];
   },
   //センサー反応した最終時刻（運転中08:52:12〜などと表示）
   getSensingStTime:(state)=>(tgtMachine)=>{

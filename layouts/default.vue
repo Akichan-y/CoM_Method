@@ -58,44 +58,44 @@ export default {
       items: [
         {
           icon: 'mdi-apps',
-          title: '一覧表示',
+          title: 'メイン画面',
           to: '/'
         },
-        {
-          icon: 'mdi-qrcode-scan',
-          title: 'QR読取り',
-          to: '/QRcode'
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire'
-        },
-        {
-          icon: 'mdi-camera',
-          title: 'Gallery',
-          to: '/Gallery'
-        },
-        {
-          icon: 'mdi-file-powerpoint-box',
-          title: 'HPライン',
-          to: '/next_HP'
-        },
+        // {
+        //   icon: 'mdi-qrcode-scan',
+        //   title: 'QR読取り',
+        //   to: '/QRcode'
+        // },
+        // {
+        //   icon: 'mdi-chart-bubble',
+        //   title: 'Inspire',
+        //   to: '/inspire'
+        // },
+        // {
+        //   icon: 'mdi-camera',
+        //   title: 'Gallery',
+        //   to: '/Gallery'
+        // },
+        // {
+        //   icon: 'mdi-file-powerpoint-box',
+        //   title: 'HPライン',
+        //   to: '/next_HP'
+        // },
         {
           icon: 'mdi-panda',
-          title: '編集',
+          title: '機械登録データ編集',
           to: '/CRUD'
         },
-        {
-          icon: 'mdi-youtube',
-          title: 'YouTube',
-          to: '/youtube'
-        },
+        // {
+        //   icon: 'mdi-youtube',
+        //   title: 'YouTube',
+        //   to: '/youtube'
+        // },
       ],
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: "雅IoT-A.Yama"
+      title: "【実践！ CoM_Methodによる劇的効果！！】"
     }
   },
   methods: {

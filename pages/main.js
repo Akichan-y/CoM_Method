@@ -15,7 +15,12 @@ export default {
       mydate: new Date().toISOString().substr(0, 10),
       secondsValue:0,
       secondsValueStart:0,  
-      message:"Hello New Projext",
+      message:"CoM_Method",
+
+      Nishio:true,
+      NishioHP:true,
+      Fukushima:false,
+
 
       TimeIncrease:[0,0],
       machinesRensou: {},
@@ -97,6 +102,10 @@ export default {
     }
   },
   methods:{
+    KyouseiReset(){
+      vue.$forceUpdate();
+      console.log("vue.$forceUpdate()の実行完了！")
+    },
     cycleTimeArrayUD(){
       this.$store.commit('timeBank/cycleTimeArrayUD',{machineCode:"LN034",timeDeff:345})
     },
@@ -254,7 +263,7 @@ export default {
               
                   //==============================================================
                   //store.timeBankのセンシング時間・・・本プログラムの反応時刻数値
-                  this.$store.commit('timeBank/sensingTimeArryUD',{machineCode:TgtMachine,sensingStartTime:TgtDStart,sensingEndTime:TgtDEnd}); 
+                  this.$store.commit('timeBank/sensingTimeArryUD',{machineCode:TgtMachine,sensingStartTime:TgtDStart,sensingEndTime:TgtDEnd,JustSensingTime:Date.now()}); 
 
                   //store.timeBankのセンシング時間・テキスト形式
                   this.$store.commit('timeBank/sensingTimeStArryUD',{machineCode:TgtMachine,sensingTime:Tgt_HMS}); 
@@ -369,12 +378,6 @@ export default {
           Object.keys(this.standArry).forEach(key => 
             this.$store.commit("timeBank/cycleTimeArrayKKTRst",{machineCode:key}), //trueの場合は、
           );
-          // this.data_kadou=[];
-          // this.data_Teishi=[];
-          // this.data_kadou_total=123;
-          // this.$store.commit('kadouJikanReset')
-          // this.data_Teishi_Title = [];
-          // this.labelSample=[];
 
 
           this.lastD=0;
@@ -447,7 +450,7 @@ export default {
               this.$store.commit('timeBank/statusArryUD',{machineCode:TgtMachine,statusBool:3});          
               //段取り回数配列をカウントアップ
               this.$store.commit('timeBank/cycleCounterDDRUD',{machineCode:TgtMachine,first:false});
-
+              this.MaijiArrayVuexSet(TgtHStart,TgtH,TgtDStart,TgtDEnd,TgtMachine,TimeDeff,4,'timeBank/cycleTimeArrayMaijiUD');
 
             };
             break;
@@ -480,6 +483,8 @@ export default {
               this.$store.commit('timeBank/statusArryUD',{machineCode:TgtMachine,statusBool:4});          
               //store.timeBankのカウンター連想配列をアップ=>計画停止ではとりあえず除外
               // this.$store.commit('timeBank/cycleCounterKKTUD',TgtMachine);
+
+              this.MaijiArrayVuexSet(TgtHStart,TgtH,TgtDStart,TgtDEnd,TgtMachine,TimeDeff,4,'timeBank/cycleTimeArrayMaijiUD');
             };
             break;
 
@@ -506,6 +511,7 @@ export default {
               
               // エラー発生回数をカウントアップ
               this.$store.commit('timeBank/cycleCounterErrUD',{machineCode:TgtMachine,first:false});
+              this.MaijiArrayVuexSet(TgtHStart,TgtH,TgtDStart,TgtDEnd,TgtMachine,TimeDeff,4,'timeBank/cycleTimeArrayMaijiUD');
               break;
             // };
           case 'ERR2': //異常停止の終了
@@ -557,20 +563,9 @@ MaijiArrayVuexSet:function(TgtHStart,TgtH,TgtDStart,TgtDEnd,TgtMachine,TimeDeff,
                                                     //MC031などは、暖機運転が必要であり、７時代も動いている。
                                                     //正直に行こう！
         //ガントチャート
-        switch(nowTgtState){
-          case 0:
-            this.$store.commit('timeBank/GuntArryRUNPush',{GuntStart:SetGuntStart,GuntHorizon:TimeDeff,y:TgtHStart*8,machine:TgtMachine});
-            break;
-          case 1:
-            this.$store.commit('timeBank/GuntArryDDRPush',{GuntStart:SetGuntStart,GuntHorizon:TimeDeff,y:TgtHStart*8,machine:TgtMachine});
-            break;
-          case 4:
-            this.$store.commit('timeBank/GuntArryWaitPush',{GuntStart:SetGuntStart,GuntHorizon:TimeDeff,y:TgtHStart*8,machine:TgtMachine});
-            break;
-          default:
+        this.$store.commit('timeBank/GuntArryPush',{GuntStart:SetGuntStart,GuntHorizon:TimeDeff,y:(TgtHStart-4)*15,NowState:nowTgtState,machine:TgtMachine});
 
-        }
-          
+        
     }else{
       
       let nowTgtDEndZero= new Date(TgtDEnd);             //１時間をまたいだ終了時の時刻連番を基準時刻にセット
@@ -586,17 +581,24 @@ MaijiArrayVuexSet:function(TgtHStart,TgtH,TgtDStart,TgtDEnd,TgtMachine,TimeDeff,
       elapsed_XX[TgtHStart-8]= ByouHenkan; //第一領域(Startから次時の00分)の時間
       let finalH=Number(TgtH)-Number(TgtHStart);
 
+      this.$store.commit('timeBank/GuntArryPush',{GuntStart:SetGuntStart,GuntHorizon:ByouHenkan,y:(TgtHStart-4)*15,NowState:nowTgtState,machine:TgtMachine});
+
       //第二領域(二時間以上乖離している場合の中間)の時間
       for (let i = 1; i < finalH; i++) {
         elapsed_XX[i+(Number(TgtHStart)-8)]=3600;
-      }
+        this.$store.commit('timeBank/GuntArryPush',{GuntStart:0,GuntHorizon:3600,y:(i+Number(TgtHStart-4))*15,NowState:nowTgtState,machine:TgtMachine});
 
+      }
+      nowTgtDEndZero.setHours(Number(TgtH));
       //第三領域時＋１の時間を計算する
       let nowDeff3rd = new Date(TgtDEnd-nowTgtDEndZero);
       // console.log(nowDeff3rd);
       let ByouHenkanMin3rd = nowDeff3rd.getUTCMinutes()*60;
       let ByouHenkanSec3rd = nowDeff3rd.getUTCSeconds();
+      let ByouHenkanSec3rd_Total = ByouHenkanMin3rd + ByouHenkanSec3rd;
       elapsed_XX[Number(TgtHStart)-8+finalH] =ByouHenkanMin3rd+ByouHenkanSec3rd; 
+
+      this.$store.commit('timeBank/GuntArryPush',{GuntStart:0,GuntHorizon:ByouHenkanSec3rd_Total,y:(TgtH-4)*15,NowState:nowTgtState,machine:TgtMachine});
     };
 
 
@@ -731,7 +733,7 @@ keikaJikan:function(){
 
         const h1Start = dStart.getUTCHours();
         const m1Start = dStart.getUTCMinutes();
-        const m1xStart = dStart.getUTCHours()*60 + m1;
+        const m1xStart = dStart.getUTCHours()*60;
         const s1Start= dStart.getUTCSeconds();
 
         const h2 = String(h1).padStart(2,'0');
@@ -744,35 +746,23 @@ keikaJikan:function(){
         const ms2 =`${m2x}分${s2}秒`; //時分秒よりも、分秒の方がわかりやすいので変更 '21/3/3
         this.secondsValue = h1*3600 + m1 * 60 + s1; //経過時間を秒で表す
         this.secondsValueStart =h1Start*3600 + m1xStart + s1Start; //経過時間を秒で表す
-
-        // console.log("+++++++++++++++++++++++++" + tgtMachine);
-        this.$store.commit("timeBank/StopWatchArryUD",{machineCode:tgtMachine,StopWatchTime:ms2,StopWatchSecondsTime:this.secondsValue,StopWatchSecondsTimeStart:this.secondsValueStart});
+        // console.log(tgtMachine+'〇〇○〇〇○'+this.secondsValueStart);
+        this.$store.commit("timeBank/StopWatchArryUD",{
+          machineCode:tgtMachine,
+          StopWatchTime:ms2,
+          StopWatchSecondsTime:this.secondsValue,
+          StopWatchSecondsTimeStart:this.secondsValueStart
+        });
         
-        //進捗表示用円グラフのデータ生成
-        // const SetteiCTByou = this.$store.getters["timeBank/getCycleTimeByouArry"](tgtMachine);
-        
-        // if(this.$store.getters["timeBank/getStatus"](tgtMachine)){
-        //   const NokoriByou = SetteiCTByou-this.secondsValue;
-        //   this.$store.commit("timeBank/cycleTimeDoughnutUD",{machineCode:tgtMachine,Keika:this.secondsValue,Nokori:NokoriByou});
-        // }else{
-          
-        //   this.scondsValue = this.$store.getters["timeBank/getmachineHourArryTgt"](tgtMachine)[0];
-        //   // console.log(tgtMachine + "==>==>==>"+this.secondsValue);
-        //   const NokoriByou = SetteiCTByou-this.secondsValue;
-        //   this.$store.commit("timeBank/cycleTimeDoughnutUD",{machineCode:tgtMachine,Keika:this.secondsValue,Nokori:NokoriByou});
+        // console.log("●●●●●●"+this.$store.getters["timeBank/getSensingTimeStart"](tgtMachine));
 
-        // }
         
         // マシンアワー残りインジケーターの表示グラフ生成モジュール 21/4/14
-        // let LastMachineHourCut = this.$store.getters["timeBank/getmachineHourCutArry"];
-        // console.log(LastMachineHourCut);
       if(this.$store.getters["timeBank/getStatus"](tgtMachine)==1){
 
         // インジケーターの初期値として、前回のマシンアワーそのものをイニシャルセット
         // console.log("これならどうだ！"+this.$store.getters["timeBank/getmachineHourArryTgt"]);
         let LastMachineHourCut = this.$store.getters["timeBank/getmachineHourArryTgt"](tgtMachine)[0];
-        // let LastMachineHourCut = this.$store.getters["timeBank/getmachineHourArryTgt"]({tgtMachine,current_state:0});
-        // let LastMachineHourCut = this.$store.getters["timeBank/getmachineHourArryTgt"](tgtMachine)[0];
         // console.log(tgtMachine +"で、★★★ラスト★★★は"  + LastMachineHourCut);
         //❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏❏
         let before_d = this.$store.getters["timeBank/getSensingTime"](tgtMachine);

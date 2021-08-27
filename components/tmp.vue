@@ -10,7 +10,7 @@
     <v-card
       class="mt-1 mb-1 py-0 mx-auto"
       width="300px"
-      height="570px"
+      height="600px"
       elevation="20"
     >
       <v-container class="my-0 py-0 grey lighten-5">
@@ -51,15 +51,16 @@
             {{ name }} 停止中【CT {{ getCycleTimeByouArryString }}】
           </div>
         </v-row>
+        <div class="mt-3 ml=2 text-left caption font-size=12px" :class="{ contentTgt: isTgt }">
+          {{ getCurrentTarget }}
+        </div>
 
-
-        <v-row no-gutters class="mt-0 mb-0 pa-0 ">
-          <v-col cols="4" fluid class="mt-2 mb-0 mr-0 ml-0 pl-1">
-              <!-- <img :src="image_src" width="100%"> -->
+        <v-row no-gutters class="mt-0 mb-0 pa-0">
+          <v-col cols="4" fluid class="mt-0 mb-0 pa-0">
 
           </v-col>
 
-          <v-col cols="8" class="mt-2">
+          <v-col cols="8" class="mt-0">
 
             <v-row class="mt-0 pa-0">
               <v-col class="my-0 pa-0">
@@ -69,8 +70,6 @@
              
 
             </v-row>
-
-
             <v-row class="mt-1   pa-0">
               <v-col class="my-0 pa-0">
                 <p
@@ -161,7 +160,7 @@
 
       <v-row my-0>
 
-        <svg width="320" height="240"  viewBox="0 0 300 240" mt-0>
+        <svg width="320" height="300"  viewBox="0 0 300 300" mt-0>
           <rect x="10" y="0" width="272" height="230" fill='#EEEEEE' stroke="blue" stroke-width="1" />
           <!-- <text x="0" y="0" font-family="Verdana" font-size="12" fill="gray">基準</text> -->
 
@@ -193,11 +192,11 @@
           <text x="15" y="108" font-family="Verdana" font-size="12">8:00</text>
           <text x="15" y="108" font-family="Verdana" font-size="12">8:00</text> -->
 
-          <path :d=path fill="none" stroke="gray" stroke-width="9"  v-for="(path, idx) of getGuntArryWait" :key="idx"/>
-          <path :d=path2 fill="none" stroke="rgb(0,255,0)" stroke-width="9"  v-for="(path2, idx2) of getGuntArryRUN" :key="idx2"/>
-          <path :d=path3 fill="none" stroke="yellow" stroke-width="9"  v-for="(path3, idx3) of getGuntArryDDR" :key="idx3"/>
-          <path :d=path4 fill="red" stroke="deeppink" stroke-width="9"  v-for="(path4, idx4) of getGuntArryKKT" :key="idx4"/>
-          <path :d=path5 fill="red" stroke="deeppink" stroke-width="9"  v-for="(path5, idx5) of getGuntArryERR" :key="idx5"/>
+          <path :d=path fill="none" stroke="gray" stroke-width="9"  v-for="(path, idx) in getGuntArryWait" :key="idx"/>
+          <path :d=path2 fill="none" stroke="rgb(0,255,0)" stroke-width="9"  v-for="(path2, idx2) in getGuntArryRUN" :key="idx2"/>
+          <path :d=path3 fill="none" stroke="yellow" stroke-width="9"  v-for="(path3, idx3) in getGuntArryDDR" :key="idx3"/>
+          <path :d=path3 fill="red" stroke="deeppink" stroke-width="9"  v-for="(path3, idx3) in getGuntArryKKT" :key="idx3"/>
+          <path :d=path3 fill="red" stroke="deeppink" stroke-width="9"  v-for="(path3, idx3) in getGuntArryERR" :key="idx3"/>
 
 
           <line x1="12" y1="38" x2="280" y2="38" stroke="darkgray" />
@@ -216,9 +215,7 @@
         </svg>
       </v-row>
 
-        <div  class="mt-3 ml=2 text-left caption font-size=12px" :class="{ contentTgt: isTgt }">
-          {{ getCurrentTarget }}
-        </div>
+
         <p class="grey--text mt-1 mb-0 ml-3 text-center  text--darken-1 font-weight-bold subtitle2">
           <!-- {{current_MH}} -->
 
@@ -510,16 +507,16 @@ export default {
         },
 
      Beki(){
-       let NowChinchoku = Math.round(this.getCountData - this.calc_BekiKaisu);
+       let NowChinchoku = this.getCountData - this.calc_BekiKaisu;
 
         switch(true) {
-            case NowChinchoku < -20:
+            case NowChinchoku <= -21:
                 return{
                   color:"red",
                   background:"black"
                 }
                 break;
-            case NowChinchoku >= -20 && NowChinchoku < -5:
+            case NowChinchoku >= -20 && NowChinchoku <= -6:
                 return{
                   color:"white",
                   background:"red"
@@ -531,21 +528,9 @@ export default {
                   background:"yellow"
                 }
                 break;
-            case NowChinchoku >= -3 && NowChinchoku < 0 :
+            case NowChinchoku >= -3 && NowChinchoku < 3 :
                 return{
-                  color:"pink",
-                  background:"white"
-                }
-                break;
-            case NowChinchoku >= 0 && NowChinchoku < 1 :
-                return{
-                  color:"blue",
-                  background:"white"
-                }
-                break;
-            case NowChinchoku >= 1 && NowChinchoku < 3 :
-                return{
-                  color:"gray",
+                  color:"grey",
                   background:"white"
                 }
                 break;
